@@ -1,6 +1,9 @@
 import networkx as nx
+import exception.HeterogeneousLinkBelongsToSameGraphException
 import numpy as np
 import scipy as sp
+
+from heterogeneousgraph.util import *
 
 node_dict_factory = dict
 graph_dict_factory = dict
@@ -149,9 +152,10 @@ class HeGraph(object):
         :return:
         """
         if graph_index_1 in self.sub_graphs.keys() and graph_index_2 in self.sub_graphs.keys():
+            # make sure that the graph is exist
             if node_index_1 in self.sub_graphs[graph_index_1].nodes() and node_index_2 in self.sub_graphs[
                 graph_index_2].nodes():
-                self.heterogeneous_links.append((graph_index_1, node_index_1, graph_index_2, node_index_2))
+                self.heterogeneous_links.append(sort_heterogeneous_link(graph_index_1, node_index_1, graph_index_2, node_index_2))
             else:
                 raise nx.NetworkXError("the node is not in graph")
         else:
@@ -175,44 +179,4 @@ class HeGraph(object):
         return result
 
 
-"""
-Util function
-"""
 
-
-def adjlist_of_heterogeneous_graph(graph_1: nx.Graph, graph_2: nx.Graph, heterogeneous_links: list) -> dict:
-    """
-    adjlist of two heterogeneous graph
-
-    :param graph_1:
-    :param graph_2:
-    :param heterogeneous_links:
-    :return:
-    """
-    result = dict()
-    for link in heterogeneous_links:  # type:(int,int,int,int)
-        if link[1] in graph_1.nodes():
-            if link[2] in graph_2.nodes():
-                if link[1] in result.keys():
-                    result[link[1]][link[3]] = 1
-                else:
-                    result[link[1]] = {link[2]: 1}
-            else:
-                raise nx.NetworkXError("node not in graph_2")
-        else:
-            raise nx.NetworkXError("node not in graph_1")
-
-
-def filter_heterogeneous_links(graph_1_index, graph_2_index, heterogeneous_links: list):
-    """Filter the heterogeneous_links
-    return links that connect graph_1 and graph_2
-
-    :param graph_1_index:
-    :param graph_2_index:
-    :param heterogeneous_links:
-    :return:
-    """
-    return list(filter(
-        lambda x: (x[0] == graph_1_index and x[2] == graph_2_index) or (
-        x[0] == graph_2_index and x[2] == graph_1_index),
-        iter(heterogeneous_links)))
