@@ -1,5 +1,6 @@
+from typing import List
+
 import networkx as nx
-import exception.HeterogeneousLinkBelongsToSameGraphException
 import numpy as np
 import scipy as sp
 
@@ -12,9 +13,9 @@ adjlist_dict_factory = dict
 
 class HeGraph(object):
     def __init__(self):
-        self.node_dict_factory = ndf = self.node_dict_factory
-        self.adjlist_dict_factory = self.adjlist_dict_factory
-        self.graph_dict_factory = gdf = self.graph_dict_factory
+        self.node_dict_factory = ndf = node_dict_factory
+        self.adjlist_dict_factory = adjlist_dict_factory
+        self.graph_dict_factory = gdf = graph_dict_factory
 
         self.adj = ndf()  # empty adjacency dict
         self.sub_graphs = gdf()  # type:dict{int:str}
@@ -24,7 +25,7 @@ class HeGraph(object):
         index = len(self.sub_graphs.keys())
         self.sub_graphs[index] = graph
 
-    def add_node_to_sub_graph(self, sub_graph_index: int, n, attr_dict, **attr) -> None:
+    def add_node_to_sub_graph(self, sub_graph_index: int, n, attr_dict=None, **attr) -> None:
         """Add a single node n and update node attributes.
 
         Parameters
@@ -77,7 +78,7 @@ class HeGraph(object):
         graph = self.sub_graphs[sub_graph_index]  # type:nx.Graph
         graph.add_nodes_from(nodes, **attr)
 
-    def remove_node(self, sub_graph_index: int, n):
+    def remove_node_from_sub_graph(self, sub_graph_index: int, n):
         """Remove node n.
 
         Removes the node n and all adjacent edges.
@@ -100,15 +101,21 @@ class HeGraph(object):
         """
         graph = self.sub_graphs[sub_graph_index]  # type:nx.Graph
         graph.remove_node(n)
+        self.heterogeneous_links = list(
+            filter(lambda x: x[0] != sub_graph_index and x[1] != n and x[2] != sub_graph_index and x[3] != n,
+                   iter(self.heterogeneous_links)))
 
-    def remove_nodes_from_sub_graph(self, sub_graph_index, nodes):
+    def remove_nodes_from_sub_graph(self, sub_graph_index: int, nodes: List[int]):
         graph = self.sub_graphs[sub_graph_index]  # type:nx.Graph
         graph.remove_nodes_from(nodes)
+        self.heterogeneous_links = list(filter(
+            lambda x: x[0] != sub_graph_index and x[1] not in nodes and x[2] != sub_graph_index and x[3] not in nodes,
+            iter(self.heterogeneous_links)))
 
     def nodes_iter(self, sub_graph_index, data=False):
         if data:
             return iter(self.sub_graphs[sub_graph_index].nodes.items())
-        return iter(self.sub_graphs[sub_graph_index].nodes)
+        return iter(self.sub_graphs[sub_graph_index].nodes())
 
     def sub_graph_iter(self):
         """Return an iterator over sub-graph
@@ -155,7 +162,8 @@ class HeGraph(object):
             # make sure that the graph is exist
             if node_index_1 in self.sub_graphs[graph_index_1].nodes() and node_index_2 in self.sub_graphs[
                 graph_index_2].nodes():
-                self.heterogeneous_links.append(sort_heterogeneous_link(graph_index_1, node_index_1, graph_index_2, node_index_2))
+                self.heterogeneous_links.append(
+                    sort_heterogeneous_link(graph_index_1, node_index_1, graph_index_2, node_index_2))
             else:
                 raise nx.NetworkXError("the node is not in graph")
         else:
@@ -177,6 +185,3 @@ class HeGraph(object):
                         result[graph_1_index] = {graph_2_index: adjlist_1_2}
 
         return result
-
-
-

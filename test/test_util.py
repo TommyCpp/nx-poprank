@@ -22,4 +22,4 @@ class TestUtil(unittest.TestCase):
     def test_sort_heterogeneous_link(self):
         heterogeneous_link = (1, 1, 0, 0)
         self.assertEqual((0, 0, 1, 1), sort_heterogeneous_link(*heterogeneous_link))
-# todo: assert exception
+        self.assertRaises(HeterogeneousLinkBelongsToSameGraphException, sort_heterogeneous_link, 1, 1, 1, 1)
