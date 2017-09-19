@@ -2,7 +2,7 @@ from unittest import TestCase
 
 import networkx as nx
 
-from heterogeneousgraph.HeGraph import HeGraph
+from heterogeneousgraph import HeGraph
 
 
 class TestHeGraph(TestCase):
@@ -68,5 +68,43 @@ class TestHeGraph(TestCase):
         G.add_heterogeneous_edge(0, 0, 1, 0)
         G.add_heterogeneous_edge(2, 2, 1, 1)
         print(G.heterogeneous_graph_adj_dict())
-        self.assertEqual({0: {1: {0: {0}}, 2: {}}, 1: {0: {0: {0}}, 2: {1: {2}}}, 2: {0: {}, 1: {1: {2}}}},
+        except_result = {
+            0: {
+                1: {
+                    0: {0}
+                },
+                2: {}
+            },
+            1: {
+                0:
+                    {
+                        0: {0}
+                    },
+                2: {
+                    1: {2}
+                }
+            },
+            2: {
+                0: {},
+                1: {
+                    1: {2}
+                }
+            }
+        }
+        self.assertEqual(except_result,
                          G.heterogeneous_graph_adj_dict())
+
+    def test_has_heterogeneous_link(self):
+        G = self._setup(3)
+        G.add_heterogeneous_edge(0, 0, 1, 0)
+        G.add_heterogeneous_edge(2, 2, 1, 1)
+        self.assertTrue(G.has_heterogeneous_link(0, 0, 1, 0))
+
+    def test_heterogeneous_degree_to(self):
+        G = self._setup(3)
+        G.add_heterogeneous_edge(0, 0, 1, 0)
+        G.add_heterogeneous_edge(0, 0, 1, 1)
+        G.add_heterogeneous_edge(0, 0, 2, 1)
+        G.add_heterogeneous_edge(2, 2, 1, 1)
+        self.assertEqual(2, G.heterogeneous_degree_to(0, 0, 1))
+        self.assertEqual(3, G.heterogeneous_degree(0, 0))

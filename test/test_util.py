@@ -1,8 +1,6 @@
 import unittest
 
-import networkx as nx
-
-from heterogeneousgraph.util import *
+from util import *
 
 
 class TestUtil(unittest.TestCase):

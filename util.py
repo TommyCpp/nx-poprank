@@ -3,7 +3,7 @@ Util function
 """
 import networkx as nx
 
-from heterogeneousgraph.exception import HeterogeneousLinkBelongsToSameGraphException
+from exception import HeterogeneousLinkBelongsToSameGraphException
 
 
 def adjlist_of_heterogeneous_graph(graph_1: nx.Graph, graph_2: nx.Graph, heterogeneous_links: list) -> dict:

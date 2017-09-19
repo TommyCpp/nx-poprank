@@ -1,10 +1,7 @@
-from typing import List
+from typing import List, Tuple
 
-import networkx as nx
-import numpy as np
-import scipy as sp
-
-from heterogeneousgraph.util import *
+from exception import SubGraphNotExist
+from util import *
 
 node_dict_factory = dict
 graph_dict_factory = dict
@@ -185,3 +182,41 @@ class HeGraph(object):
                         result[graph_1_index] = {graph_2_index: adjlist_1_2}
 
         return result
+
+    def has_heterogeneous_link(self, graph_index_1: int, node_index_1: int, graph_index_2: int,
+                               node_index_2: int) -> bool:
+        graph_index_1, node_index_1, graph_index_2, node_index_2 = sort_heterogeneous_link(graph_index_1, node_index_1,
+                                                                                           graph_index_2, node_index_2)
+
+        def _has_heterogeneous_link(x: Tuple[int, int, int, int]):
+            return x[0] == graph_index_1 and x[1] == node_index_1 and x[2] == graph_index_2 and x[3] == node_index_2
+
+        return next(filter(_has_heterogeneous_link, iter(self.heterogeneous_links)), None) is not None
+
+    def heterogeneous_degree(self, sub_graph_index, node_index):
+        """
+        how many links between (sub_graph_index,node_index) and other graph
+        :param sub_graph_index:
+        :param node_index:
+        :return:
+        """
+        if sub_graph_index not in self.sub_graphs.keys():
+            raise SubGraphNotExist()
+
+        return len(list(filter(
+            lambda x: x[2] == sub_graph_index and x[3] == node_index or x[0] == sub_graph_index and x[1] == node_index,
+            iter(self.heterogeneous_links))))
+
+    def heterogeneous_degree_to(self, source_graph: int, source_node: int, target_graph: int):
+        if source_graph not in self.sub_graphs.keys() or target_graph not in self.sub_graphs.keys():
+            raise SubGraphNotExist()
+
+        def _heterogeneous_degree_to_filter(link):
+            x, x_node, y, y_node = link
+            if x == source_graph and x_node == source_node and y == target_graph:
+                return True
+            if y == source_graph and y_node == source_node and x == target_graph:
+                return True
+            return False
+
+        return len(list(filter(_heterogeneous_degree_to_filter, iter(self.heterogeneous_links))))
