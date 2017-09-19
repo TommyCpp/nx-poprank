@@ -1,11 +1,9 @@
-from unittest import TestCase
+import unittest
 
-import networkx as nx
-
-from heterogeneousgraph import HeGraph
+from heterogeneousgraph import *
 
 
-class TestHeGraph(TestCase):
+class TestHeGraph(unittest.TestCase):
     def _setup(self, sub_graph_count=1):
         G = HeGraph()
         for i in range(sub_graph_count):
@@ -76,10 +74,9 @@ class TestHeGraph(TestCase):
                 2: {}
             },
             1: {
-                0:
-                    {
-                        0: {0}
-                    },
+                0: {
+                    0: {0}
+                },
                 2: {
                     1: {2}
                 }
@@ -87,7 +84,7 @@ class TestHeGraph(TestCase):
             2: {
                 0: {},
                 1: {
-                    1: {2}
+                    2: {1}
                 }
             }
         }

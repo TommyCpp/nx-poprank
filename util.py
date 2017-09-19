@@ -6,23 +6,34 @@ import networkx as nx
 from exception import HeterogeneousLinkBelongsToSameGraphException
 
 
-def adjlist_of_heterogeneous_graph(graph_1: nx.Graph, graph_2: nx.Graph, heterogeneous_links: list) -> dict:
+def adjlist_of_heterogeneous_graph(G, graph_1_index: int, graph_2_index: int,
+                                   heterogeneous_links: list) -> dict:
     """
     adjlist of two heterogeneous graph
 
-    :param graph_1:
-    :param graph_2:
+    :param G:
+    :param graph_1_index:
+    :param graph_2_index:
     :param heterogeneous_links:
     :return:
     """
     result = dict()
+    graph_1 = G.sub_graphs[graph_1_index]
+    graph_2 = G.sub_graphs[graph_2_index]
     for link in heterogeneous_links:  # type:(int,int,int,int)
-        if link[1] in graph_1.nodes():
-            if link[3] in graph_2.nodes():
-                if link[1] in result.keys():
-                    result[link[1]][link[3]] = 1
+        if link[0] == graph_1_index:
+            pair_1 = (link[0], link[1])
+            pair_2 = (link[2], link[3])
+        else:
+            pair_1 = (link[2], link[3])
+            pair_2 = (link[0], link[1])
+
+        if pair_1[1] in graph_1.nodes():
+            if pair_2[1] in graph_2.nodes():
+                if pair_1[1] in result.keys():
+                    result[pair_1[1]][pair_2[1]] = 1
                 else:
-                    result[link[1]] = {link[3]}
+                    result[pair_1[1]] = {pair_2[1]}
             else:
                 raise nx.NetworkXError("node not in graph_2")
         else:
