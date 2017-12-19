@@ -71,5 +71,7 @@ def heterogeneous_neighbour_matrix(G: HeGraph):
                 result[x][y] = np.zeros(
                     (len(x_graph.nodes()), len(y_graph.nodes()))
                 )
-                for (x_node, y_node) in adj_dict[x][y]:
-                    pass  # todo
+                for x_node in adj_dict[x][y].keys():
+                    for y_node in adj_dict[x][y][x_node]:
+                        result[x][y][x_node][y_node] = 1
+    return result
