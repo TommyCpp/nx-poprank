@@ -6,7 +6,7 @@ from test.GraphTestCase import GraphTestCase
 
 class TestHeGraph(GraphTestCase):
     def _setup(self, sub_graph_count=1, **kwargs):
-        return super()._setup(sub_graph_count=1, node_per_graph=3, probability_of_edge_creation=1)
+        return super()._setup(sub_graph_count=sub_graph_count, node_per_graph=3, probability_of_edge_creation=1)
 
     def test_add_graph(self):
         G = HeGraph()
@@ -66,22 +66,22 @@ class TestHeGraph(GraphTestCase):
         except_result = {
             0: {
                 1: {
-                    0: {0}
+                    0: {0: {}}
                 },
                 2: {}
             },
             1: {
                 0: {
-                    0: {0}
+                    0: {0: {}}
                 },
                 2: {
-                    1: {2}
+                    1: {2: {}}
                 }
             },
             2: {
                 0: {},
                 1: {
-                    1: {2}
+                    2: {1: {}}
                 }
             }
         }

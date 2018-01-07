@@ -1,4 +1,5 @@
-from typing import Tuple, Callable, Iterable
+import heapq
+from typing import Tuple, Callable, Iterable, List
 
 from heterogeneousgraph import HeGraph
 import networkx as nx
@@ -49,3 +50,13 @@ def edge_cluster_coefficient_in_3_dimension(G: nx.Graph, u: int, v: int) -> floa
     z3 = [node for node in u_neighbour if node in v_neighbour]
     min_k = min(G.degree(u) - 1, G.degree(v) - 1)
     return (len(z3) + 1.) / min_k if min_k != 0 else 0
+
+
+def get_edge_priority_queue_by_coefficient_of_edge_clustering(G: nx.Graph,
+                                                              edgeWeightfunc: Callable = lambda x, y: (x + y) / 2.):
+    result = []
+    for (u, v) in G.edges():
+        uValue = G.node[u]["value"]
+        vValue = G.node[v]["value"]
+        heapq.heappush(result, (edgeWeightfunc(uValue, vValue), u, v))
+    return result

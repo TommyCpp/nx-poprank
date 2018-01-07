@@ -25,6 +25,10 @@ class TestPopRank(TestCase):
         sub_graph_2.add_edge(3, 4)
         G.add_graph(sub_graph_1)
         G.add_graph(sub_graph_2)
+        G.add_heterogeneous_edge(0, 1, 1, 1)
+        G.add_heterogeneous_edge(0, 2, 1, 4)
+        result = poprank.pop_rank(G)
+        print(result)
 
     def test_heterogeneous_neighbour_matrix(self):
         G = self._setup(3)
