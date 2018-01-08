@@ -171,7 +171,7 @@ class HeGraph(object):
         for graph_1_index, graph_1 in self.sub_graphs.items():
             for graph_2_index, graph_2 in self.sub_graphs.items():
                 if graph_1_index != graph_2_index:
-                    adjlist_1_2 = adjlist_of_heterogeneous_graph(graph_1, graph_2,
+                    adjlist_1_2 = adjlist_of_heterogeneous_graph(self, graph_1_index, graph_2_index,
                                                                  filter_heterogeneous_links(
                                                                      graph_1_index,
                                                                      graph_2_index,
