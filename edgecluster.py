@@ -16,18 +16,33 @@ class MaxHeap:
         result = heapq.heappop(self.data)
         return -result[0], result[1], result[2]
 
-    def get_all(self):
-        return [(-value, u, v) for (value, u, v) in self.data]
-
     def __len__(self):
         return len(self.data)
 
     def __str__(self):
         return str(self.data)
 
+    def empty(self):
+        return len(self.data) == 0
 
-def find_community_by_edge_cluster(G: nx.Graph(), nodeValueCaculateFunc: Callable):
-    pass  # todo:implement
+
+def find_community_by_edge_cluster(G: nx.Graph, nodeValueCaculateFunc: Callable):
+    node_values = nx.get_node_attributes(G, "value")
+    edges = G.edges()
+    max_heap = get_edge_priority_queue_by_coefficient_of_edge_clustering(node_values, edges)
+    has_in_community = set()
+    while not max_heap.empty():
+        edge_with_attr = max_heap.get()
+        seed_edge = (edge_with_attr[1], edge_with_attr[2])
+        if seed_edge in has_in_community:
+            continue
+        else:
+            # find local community
+            community = {seed_edge}
+            has_in_community.add(seed_edge)
+            while 1:
+                canadians = MaxHeap()
+                # todo: continue implement
 
 
 def sort_node_of_edge(edges: Iterable[Tuple[int, int]]):
@@ -87,3 +102,32 @@ def get_edge_priority_queue_by_coefficient_of_edge_clustering(nodeValue: Dict, e
     for (u, v) in edges:
         result.put((edgeWeightfunc(nodeValue[u], nodeValue[v]), u, v))
     return result
+
+
+def get_neighbour_edge_of_edge_community(G: nx.Graph, edge_community: List):
+    result = set()
+    community_nodes = get_node_from_edge_community(edge_community)
+    for node in community_nodes:
+        for neighbour in G.neighbors(node):
+            if neighbour not in community_nodes:
+                result.add((node, neighbour) if node < neighbour else (neighbour, node))
+    return list(result)
+
+
+def community_fitness(node_value: Dict, edge_community: List, edge_weight_func: Callable = lambda x, y: (x + y) / 2.):
+    def get_m_in():
+        """
+        Computer the sum of node's value
+        :param nodes:
+        :return:
+        """
+        result = 0.
+        for edge in edge_community:
+            result += edge_weight_func(*edge)
+        return result
+
+    def get_m_out(nodes):
+        result = 0.
+        # todo:implement
+    community_nodes = get_node_from_edge_community(edge_community)
+    return
