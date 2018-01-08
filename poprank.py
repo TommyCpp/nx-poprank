@@ -43,8 +43,8 @@ def pop_rank(g: HeGraph, epsilon=0.5, propagation_factor=None, alpha=0.85, max_i
     iterator_pop_rank = {}
 
     for sub_graph_index in g.sub_graphs.keys():
-        poprank[sub_graph_index] = np.array([page_rank[sub_graph_index].values()])
-        iterator_pop_rank[sub_graph_index] = np.zeros((1, len(np.array([page_rank[sub_graph_index].values()]))))
+        poprank[sub_graph_index] = np.array([list(page_rank[sub_graph_index].values())])
+        iterator_pop_rank[sub_graph_index] = np.zeros((1, len(g.sub_graphs[sub_graph_index].nodes())))
 
     m_xy = heterogeneous_neighbour_matrix(g)
 
@@ -73,6 +73,5 @@ def heterogeneous_neighbour_matrix(G: HeGraph):
                 )
                 for x_node in adj_dict[x][y].keys():
                     for y_node in adj_dict[x][y][x_node]:
-                        result[x][y][x_node][y_node] = 1. / G.heterogeneous_degree_to(y, y_node, x)
-
+                        result[x][y][x_node][y_node] = 1
     return result

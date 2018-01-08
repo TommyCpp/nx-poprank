@@ -6,34 +6,25 @@ import networkx as nx
 from exception import HeterogeneousLinkBelongsToSameGraphException
 
 
-def adjlist_of_heterogeneous_graph(G, graph_1_index: int, graph_2_index: int,
-                                   heterogeneous_links: list) -> dict:
+def adjlist_of_heterogeneous_graph(graph_1: nx.Graph, graph_2: nx.Graph, heterogeneous_links_bwtween_1_2: list) -> dict:
     """
     adjlist of two heterogeneous graph
 
-    :param G:
-    :param graph_1_index:
-    :param graph_2_index:
+    :param graph_1:
+    :param graph_2:
     :param heterogeneous_links:
-    :return:
+    :return: adjlist between graph_1 and graph_2,
+        key: node_index in graph_1
+        value: dict, every key refers to a node_index in graph_2 and its value can store attribute of edge
     """
     result = dict()
-    graph_1 = G.sub_graphs[graph_1_index]
-    graph_2 = G.sub_graphs[graph_2_index]
-    for link in heterogeneous_links:  # type:(int,int,int,int)
-        if link[0] == graph_1_index:
-            pair_1 = (link[0], link[1])
-            pair_2 = (link[2], link[3])
-        else:
-            pair_1 = (link[2], link[3])
-            pair_2 = (link[0], link[1])
-
-        if pair_1[1] in graph_1.nodes():
-            if pair_2[1] in graph_2.nodes():
-                if pair_1[1] in result.keys():
-                    result[pair_1[1]][pair_2[1]] = 1
+    for (n1, n2) in heterogeneous_links_bwtween_1_2:  # type:(int,int,int,int)
+        if n1 in graph_1.nodes():
+            if n2 in graph_2.nodes():
+                if n1 in result.keys():
+                    result[n1][n2] = {}
                 else:
-                    result[pair_1[1]] = {pair_2[1]}
+                    result[n1] = {n2: {}}
             else:
                 raise nx.NetworkXError("node not in graph_2")
         else:
@@ -50,10 +41,13 @@ def filter_heterogeneous_links(graph_1_index, graph_2_index, heterogeneous_links
     :param heterogeneous_links:
     :return:
     """
-    return list(filter(
-        lambda x: (x[0] == graph_1_index and x[2] == graph_2_index) or (
-            x[0] == graph_2_index and x[2] == graph_1_index),
-        iter(heterogeneous_links)))
+    result = []
+    for (g1, n1, g2, n2) in heterogeneous_links:
+        if g1 == graph_1_index and g2 == graph_2_index:
+            result.append((n1, n2))
+        if g1 == graph_2_index and g2 == graph_1_index:
+            result.append((n2, n1))
+    return result
 
 
 def sort_heterogeneous_link(graph_1_index: int, node_1_index: int, graph_2_index: int, node_2_index: int) -> tuple:

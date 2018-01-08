@@ -1,7 +1,6 @@
 import unittest
 
 from util import *
-from heterogeneousgraph import HeGraph
 
 
 class TestUtil(unittest.TestCase):
@@ -9,16 +8,16 @@ class TestUtil(unittest.TestCase):
         heterogeneous_links = [(0, 0, 1, 0), (1, 1, 0, 1), (1, 2, 4, 5)]
         result = filter_heterogeneous_links(0, 1, heterogeneous_links)
         print(result)
-        self.assertEqual(2, len(result))
+        self.assertTrue((0, 1, 1, 1) in result)
+        self.assertTrue((0, 0, 1, 0) in result)
+        self.assertTrue((1, 2, 4, 5) not in result)
+        self.assertTrue((1, 1, 0, 1) not in result)
 
     def test_adjlist_of_heterogeneous_graph(self):
-        G = HeGraph()
-        graph_1 = nx.fast_gnp_random_graph(3, 3)
+        graph_1 = nx.fast_gnp_random_graph(4, 3)
         graph_2 = nx.fast_gnp_random_graph(3, 3)
-        G.add_graph(graph_1)
-        G.add_graph(graph_2)
-        heterogeneous_links = [(0, 0, 1, 0), (0, 1, 1, 1), (0, 2, 1, 0)]
-        result = adjlist_of_heterogeneous_graph(G, 0, 1, heterogeneous_links)
+        heterogeneous_links = [(0, 0), (0, 1), (1, 1), (2, 0), (3, 0)]
+        result = adjlist_of_heterogeneous_graph(graph_1, graph_2, heterogeneous_links)
         print(result)
 
     def test_sort_heterogeneous_link(self):
