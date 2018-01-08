@@ -52,8 +52,8 @@ class TestPopRank(TestCase):
                                    [0., 0., 0.],
                                    [0., 0., 0.]]),
                       1: np.array([[0., 0., 0.],
-                                   [0., 0., 1.],
-                                   [0., 0., 0.]])}}
+                                   [0., 0., 0.],
+                                   [0., 1., 0.]])}}
         for i in result.keys():
             for j in result[i].keys():
                 np.testing.assert_almost_equal(expect[i][j], result[i][j])
