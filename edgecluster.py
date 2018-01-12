@@ -44,7 +44,7 @@ def find_community_by_edge_cluster(G: nx.Graph, nodeValueCaculateFunc: Callable)
             has_in_community.add(seed_edge)
             while 1:
                 canadians = MaxHeap()
-                # todo: continue implement
+                # todo: test all function
                 neighbours = get_neighbour_edge_of_edge_community(G, community)
                 for neighbour in neighbours:
                     if neighbour not in community and neighbour not in has_in_community:
