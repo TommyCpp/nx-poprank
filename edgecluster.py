@@ -1,6 +1,6 @@
 import heapq
 import queue
-from typing import Tuple, Callable, Iterable, List, Dict
+from typing import Tuple, Callable, Iterable, List, Dict, Set
 
 from heterogeneousgraph import HeGraph
 import networkx as nx
@@ -30,7 +30,9 @@ def find_community_by_edge_cluster(G: nx.Graph, nodeValueCaculateFunc: Callable)
     node_values = nx.get_node_attributes(G, "value")
     edges = G.edges()
     max_heap = get_edge_priority_queue_by_coefficient_of_edge_clustering(node_values, edges)
+    edge_clusters = edge_cluster_coefficients(G)
     has_in_community = set()
+    communities = []
     while not max_heap.empty():
         edge_with_attr = max_heap.get()
         seed_edge = (edge_with_attr[1], edge_with_attr[2])
@@ -43,6 +45,22 @@ def find_community_by_edge_cluster(G: nx.Graph, nodeValueCaculateFunc: Callable)
             while 1:
                 canadians = MaxHeap()
                 # todo: continue implement
+                neighbours = get_neighbour_edge_of_edge_community(G, community)
+                for neighbour in neighbours:
+                    if neighbour not in community and neighbour not in has_in_community:
+                        value = edge_fitness(G, neighbour, community, edge_clusters)
+                        if value > 0:
+                            canadians.put((value, neighbour[0], neighbour[1]))
+                if canadians.empty():
+                    communities.append(community)
+                    break
+
+                while not canadians.empty():
+                    edge = tuple(canadians.get()[1:])
+                    community.add(edge)
+                    has_in_community.add(edge)
+                    canadians = resort_canadians(G, canadians, community, edge_clusters)
+    return communities
 
 
 def sort_node_of_edge(edges: Iterable[Tuple[int, int]]):
@@ -104,18 +122,19 @@ def get_edge_priority_queue_by_coefficient_of_edge_clustering(nodeValue: Dict, e
     return result
 
 
-def get_neighbour_edge_of_edge_community(G: nx.Graph, edge_community: List):
+def get_neighbour_edge_of_edge_community(G: nx.Graph, edge_community: Set):
     result = set()
     community_nodes = get_node_from_edge_community(edge_community)
     for node in community_nodes:
         for neighbour in G.neighbors(node):
             if neighbour not in community_nodes:
                 result.add((node, neighbour) if node < neighbour else (neighbour, node))
-    return list(result)
+    return result
 
 
-def community_fitness(node_value: Dict, edge_community: List, edge_weight_func: Callable = lambda x, y: (x + y) / 2.):
-    def get_m_in():
+def community_fitness(G: nx.Graph, edge_community: List, alpha=0.5,
+                      edge_weight_func: Callable = lambda x, y: (x + y) / 2.):
+    def get_m_in(edge_community):
         """
         Computer the sum of node's value
         :param nodes:
@@ -126,8 +145,38 @@ def community_fitness(node_value: Dict, edge_community: List, edge_weight_func: 
             result += edge_weight_func(*edge)
         return result
 
-    def get_m_out(nodes):
+    def get_m_out(edge_community):
         result = 0.
-        # todo:implement
-    community_nodes = get_node_from_edge_community(edge_community)
-    return
+        neighbour_edges = get_neighbour_edge_of_edge_community(G, edge_community)
+        for edge in neighbour_edges:
+            result += edge_weight_func(*edge)
+        return result
+
+    return get_m_in(edge_community) / ((get_m_in(edge_community) + get_m_out(edge_community)) ** alpha)
+
+
+def edge_fitness(G, edge, community, clusters):
+    u = edge[0]
+    v = edge[1]
+    mock_community = community.copy()
+    edge_cluster = clusters[(u, v)]
+    if (u, v) in community:
+        community_fitness_with_edge = community_fitness(G, mock_community)
+        mock_community.remove((u, v))
+        community_fitness_without_edge = community_fitness(G, mock_community)
+        return (edge_cluster + 2) * (community_fitness_with_edge - community_fitness_without_edge)
+    else:
+        community_fitness_without_edge = community_fitness(G, mock_community)
+        mock_community.append((u, v))
+        community_fitness_with_edge = community_fitness(G, mock_community)
+        return (edge_cluster + 2) * (community_fitness_with_edge - community_fitness_without_edge)
+
+
+def resort_canadians(G, canadians, community, clusters):
+    result = MaxHeap()
+    while not canadians.empty():
+        edge = tuple(canadians.get()[1:])
+        value = edge_fitness(G, edge, community, clusters)
+        if value > 0:
+            result.put((-value, *edge))
+    return result
